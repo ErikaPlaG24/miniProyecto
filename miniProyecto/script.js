@@ -54,6 +54,7 @@ function generarAsientos() {
       div.className = "asiento disponible";
       div.dataset.fila = fila;
       div.dataset.numero = i;
+      div.textContent = `${fila}${i}`; // Mostrar posición en el asiento
       div.onclick = () => {
         if (!div.classList.contains("ocupado")) {
           div.classList.toggle("reservado");
