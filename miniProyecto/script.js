@@ -1,5 +1,12 @@
 let nombreUsuario = "";
 
+// Nuevo: Objeto para guardar asientos vendidos por sala
+const asientosVendidos = {
+  1: new Set(),
+  2: new Set(),
+  3: new Set()
+};
+
 function iniciarSesion() {
   const user = document.getElementById("usuario").value;
   const pass = document.getElementById("contrasena").value;
@@ -48,18 +55,27 @@ function generarAsientos() {
   cont.innerHTML = "";
   const filas = ["A", "B", "C", "D"];
   let contador = 0;
+  const sala = document.getElementById("salaSeleccion").value;
+  const vendidos = asientosVendidos[sala];
+
   for (let fila of filas) {
     for (let i = 1; i <= 5; i++) {
+      const idAsiento = `${fila}${i}`;
       const div = document.createElement("div");
-      div.className = "asiento disponible";
+      div.className = "asiento";
       div.dataset.fila = fila;
       div.dataset.numero = i;
-      div.textContent = `${fila}${i}`; // Mostrar posición en el asiento
-      div.onclick = () => {
-        if (!div.classList.contains("ocupado")) {
+      div.textContent = idAsiento;
+
+      if (vendidos.has(idAsiento)) {
+        div.classList.add("ocupado");
+        div.title = "Vendido";
+      } else {
+        div.classList.add("disponible");
+        div.onclick = () => {
           div.classList.toggle("reservado");
-        }
-      };
+        };
+      }
       cont.appendChild(div);
       contador++;
       if (contador >= 20) break;
@@ -70,15 +86,24 @@ function generarAsientos() {
 }
 
 function comprar() {
+  const sala = document.getElementById("salaSeleccion").value;
   const reservados = document.querySelectorAll(".asiento.reservado");
+  if (reservados.length === 0) {
+    alert("Seleccione al menos un asiento.");
+    return;
+  }
   let total = reservados.length * 75;
   let detalles = "Usuario: " + nombreUsuario + "<br>";
   reservados.forEach(a => {
+    const idAsiento = `${a.dataset.fila}${a.dataset.numero}`;
     detalles += `Fila ${a.dataset.fila}, Asiento ${a.dataset.numero}<br>`;
     a.classList.remove("reservado");
+    a.classList.remove("disponible");
     a.classList.add("ocupado");
+    a.onclick = null;
+    asientosVendidos[sala].add(idAsiento); // Guardar como vendido
   });
   document.getElementById("detallesBoleto").innerHTML = detalles;
   document.getElementById("totalPago").textContent = "Total: $" + total;
-  document.getElementById("ticket").style.display = "block";
+  document.getElementById("ticket").style.display = "block";
 }
